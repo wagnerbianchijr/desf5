@@ -82,8 +82,11 @@ terraform destroy
 Este projeto foi analisado com Infracost, uma ferramenta que estima os custos da infraestrutura gerenciada via Terraform.
 
 💰 Custo mensal estimado: aproximadamente USD $250.00
+
 🧾 Esses valores podem variar conforme a região, tipo de instância e uso real
+
 ✅ Use o Infracost localmente com infracost breakdown --path=. para ver os detalhes
+
 ⚠️ Cuidado com Recursos Ativos
 
 É ultra-necessário destruir todos os recursos após o uso com `terraform destroy` para evitar dor de cabeça.
