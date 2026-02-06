@@ -81,3 +81,22 @@ terraform destroy
 
 A arquitetura do desafio DESF5 foi estruturada para equilibrar desempenho, escalabilidade, segurança e resiliência, separando claramente camadas de acesso, aplicação e dados.
 Com a combinação de ALB, Auto Scaling e banco em sub-redes privadas com estratégia Multi-AZ, o ambiente se mantém alinhado a boas práticas de produção em AWS.
+
+💸 Custo Estimado da Infraestrutura
+
+Este projeto foi analisado com Infracost
+, uma ferramenta que estima os custos da infraestrutura gerenciada via Terraform.
+
+💰 Custo mensal estimado: aproximadamente USD $250.00
+
+🧾 Esses valores podem variar conforme a região, tipo de instância e uso real
+
+✅ Use o Infracost localmente com infracost breakdown --path=. para ver os detalhes
+
+⚠️ Cuidado com Recursos Ativos
+
+É ultra-necessário destruir todos os recursos após o uso com terraform destroy para evitar cobranças indevidas.
+
+Os recursos criados neste projeto podem gerar custos mesmo em idle
+
+Ideal para ambientes de teste, laboratório e aprendizado, mas sempre destrua quando terminar
