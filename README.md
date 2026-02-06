@@ -1,4 +1,3 @@
-````md
 # DESF5 — Arquitetura AWS Multi-AZ com ALB, Auto Scaling e Banco em Sub-redes Privadas
 
 ## Visão geral
@@ -15,8 +14,7 @@ A solução foi desenhada para operar na região **us-east-1**, distribuindo rec
 A entrada de tráfego parte dos usuários e segue para um **Application Load Balancer (ALB)** posicionado na camada pública da VPC. O ALB distribui requisições para instâncias de aplicação organizadas em **Auto Scaling Group**, também distribuídas entre múltiplas AZs.  
 A camada de dados foi posicionada em sub-redes privadas, dentro de um **DB Subnet Group**, mantendo isolamento da internet e restringindo acesso somente aos componentes autorizados pela política de segurança.
 
-O banco de dados foi modelado com os papéis **M**, **S** e **R**, em que **M** representa o nó principal (Master), **S** representa o nó de standby para continuidade operacional em cenário de falha de AZ (Multi-AZ), e **R** representa o nó de réplica para leitura.  
-Esse desenho combina continuidade de serviço, capacidade de leitura distribuída e menor exposição de recursos críticos.
+O banco de dados foi modelado com os papéis **M**, **S** e **R**, em que **M** representa o nó principal (Master), **S** representa o nó de standby para continuidade operacional em cenário de falha de AZ (Multi-AZ), e **R** representa o nó de réplica para leitura. Esse desenho combina continuidade de serviço, capacidade de leitura distribuída e menor exposição de recursos críticos.
 
 ## Camadas e responsabilidades
 
@@ -29,11 +27,13 @@ Esse desenho combina continuidade de serviço, capacidade de leitura distribuíd
 
 ## Distribuição por zonas de disponibilidade
 
+```
 | AZ | Sub-rede pública | Sub-rede privada | Papel de destaque |
 |---|---|---|---|
 | us-east-1a | public1 | private1 | Aplicação + nó Master |
 | us-east-1b | public2 | private2 | Aplicação + nó Standby (Multi-AZ) |
 | us-east-1c | public3 | private3 | Aplicação + nó Replica |
+```
 
 ## Segurança aplicada no desenho
 
@@ -62,7 +62,7 @@ terraform init
 terraform validate
 terraform plan -out=tfplan
 terraform apply tfplan
-````
+```
 
 ## Validação pós-provisionamento
 
@@ -86,4 +86,3 @@ Com a combinação de ALB, Auto Scaling e banco em sub-redes privadas com estrat
 
 Se você quiser, eu também posso te entregar uma segunda versão desse README em tom mais “executivo” (para banca/gestão) e outra mais “engenharia” (para time técnico e operação).
 ```
-
