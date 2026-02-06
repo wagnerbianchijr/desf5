@@ -9,6 +9,10 @@ A solução foi desenhada para operar na região **us-east-1**, distribuindo rec
 
 ![Diagrama da arquitetura AWS](desafio_architecture.png)
 
+## GaphWiz
+
+![Diagrama da arquitetura AWS](grpahwiz.png)
+
 ## Descrição funcional da arquitetura
 
 A entrada de tráfego parte dos usuários e segue para um **Application Load Balancer (ALB)** posicionado na camada pública da VPC. O ALB distribui requisições para instâncias de aplicação organizadas em **Auto Scaling Group**, também distribuídas entre múltiplas AZs.  
