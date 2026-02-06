@@ -32,11 +32,11 @@ O banco de dados foi modelado com os papéis **M**, **S** e **R**, em que **M** 
 ## Distribuição por zonas de disponibilidade
 
 ```
-| AZ | Sub-rede pública | Sub-rede privada | Papel de destaque |
-|---|---|---|---|
-| us-east-1a | public1 | private1 | Aplicação + nó Master |
-| us-east-1b | public2 | private2 | Aplicação + nó Standby (Multi-AZ) |
-| us-east-1c | public3 | private3 | Aplicação + nó Replica |
+|    AZs     | Sub-rede pública | Sub-rede privada | Papel de destaque                 |
+|------------|------------------|------------------|-----------------------------------|
+| us-east-1a | public1          | private1         | Aplicação + nó Master             |
+| us-east-1b | public2          | private2         | Aplicação + nó Standby (Multi-AZ) |
+| us-east-1c | public3          | private3         | Aplicação + nó Replica            |
 ```
 
 ## Segurança aplicada no desenho
