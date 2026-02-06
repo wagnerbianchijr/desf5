@@ -31,6 +31,8 @@ O banco de dados foi modelado com os papéis **M**, **S** e **R**, em que **M** 
 | Dados | Master, Standby (Multi-AZ), Replica | Persistência transacional, continuidade de serviço e leitura replicada |
 | Segurança e rede | VPC, Security Groups, sub-redes públicas e privadas | Segmentação de rede e controle de acesso entre camadas |
 
+Não há nenhum registro aqui sobre Network ACLs porque nada foi feito com relação às suas configurações padrão.
+
 ## Distribuição por zonas de disponibilidade
 
 ```
