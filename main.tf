@@ -104,8 +104,8 @@ module "asg_primary" {
   security_group_id = module.sg_primary.security_group_id #: output from sg module
 
   asg_desired_capacity = 3
-  asg_max_size         = 5
-  asg_min_size         = 1
+  asg_max_size         = 10
+  asg_min_size         = 3
 
   availability_zones          = ["us-east-1a", "us-east-1b", "us-east-1c"] /* unused */
   target_group_arns           = module.alb_primary.target_group_arns   #: output from alb module
@@ -160,5 +160,75 @@ module "alb_primary" {
 
   providers = {
     aws = aws.aws_primary
+  }
+}
+
+#: db subnet group in the primary VPC
+resource "aws_db_subnet_group" "db_subnet_group" {
+  region      = "us-east-1"
+  name        = "rds-subnet-group"
+  description = "Subnet group for RDS instances"
+  subnet_ids = [
+    module.vpc_primary.private_subnets_ids[0],
+    module.vpc_primary.private_subnets_ids[1],
+    module.vpc_primary.private_subnets_ids[2]
+  ]
+
+  tags = {
+    Name            = "rds-subnet-group"
+    EnvironmentTag  = "primary"
+    ProjectOwnerTag = "Terraform Team"
+    TerraformedTag  = true
+  }
+}
+
+
+#: creating the databases in the primary VPC
+resource "aws_db_instance" "primary_db" {
+  region               = "us-east-1"
+  identifier           = "primary-db"
+  engine               = "postgres"
+  engine_version       = "17.6"
+  instance_class       = "db.t3.medium"
+  allocated_storage    = 20
+  username             = "postgres"
+  password             = "postgres"
+  skip_final_snapshot  = true
+  multi_az             = true
+  publicly_accessible  = false
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+
+  vpc_security_group_ids = [module.sg_primary.security_group_id]
+
+  backup_retention_period = 7
+  backup_window           = "01:00-03:00"
+  maintenance_window      = "mon:03:00-mon:06:00"
+
+  tags = {
+    ProjectOwnerTag = "Terraform Team"
+    EnvironmentTag  = "primary"
+    CostCenterTag   = "CC1001"
+    CreatedByTag    = "Bianchi"
+    TerraformedTag  = true
+  }
+}
+
+resource "aws_db_instance" "secondary_db" {
+  region               = "us-east-1"
+  identifier           = "secondary-db"
+  instance_class       = "db.t3.medium"
+  replicate_source_db  = aws_db_instance.primary_db.arn
+  skip_final_snapshot  = true
+  publicly_accessible  = false
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+
+  vpc_security_group_ids = [module.sg_primary.security_group_id]
+
+  tags = {
+    ProjectOwnerTag = "Terraform Team"
+    EnvironmentTag  = "secondary"
+    CostCenterTag   = "CC1001"
+    CreatedByTag    = "Bianchi"
+    TerraformedTag  = true
   }
 }
