@@ -81,8 +81,3 @@ terraform destroy
 
 A arquitetura do desafio DESF5 foi estruturada para equilibrar desempenho, escalabilidade, segurança e resiliência, separando claramente camadas de acesso, aplicação e dados.
 Com a combinação de ALB, Auto Scaling e banco em sub-redes privadas com estratégia Multi-AZ, o ambiente se mantém alinhado a boas práticas de produção em AWS.
-
-```
-
-Se você quiser, eu também posso te entregar uma segunda versão desse README em tom mais “executivo” (para banca/gestão) e outra mais “engenharia” (para time técnico e operação).
-```
