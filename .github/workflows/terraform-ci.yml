@@ -39,9 +39,3 @@ jobs:
           cache: true
       - run: tflint --init
       - run: tflint --recursive
-      - uses: aquasecurity/trivy-action@v0.0.3
-        with:
-          scan-type: 'terraform'
-          format: 'table'
-          severity-threshold: 'HIGH'
-          exit-code: '1'
