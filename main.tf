@@ -22,8 +22,6 @@
   =============================================================================
 */
 
-
-
 #:--------------------------------------------------------------
 #: KMS Key for encrypting resources in the primary VPC
 #:--------------------------------------------------------------
@@ -218,9 +216,9 @@ module "asg_primary" {
   asg_max_size         = 10
   asg_min_size         = 3
 
-  availability_zones          = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  #availability_zones          = ["us-east-1a", "us-east-1b", "us-east-1c"]
   target_group_arns           = module.alb_primary.target_group_arns   #: output from alb module
-  public_subnets_cidr_blocks  = module.vpc_primary.public_subnets_ids  #: output from vpc module
+  #public_subnets_cidr_blocks  = module.vpc_primary.public_subnets_ids  #: output from vpc module
   private_subnets_cidr_blocks = module.vpc_primary.private_subnets_ids #: output from vpc module
 
   #: resource tags
