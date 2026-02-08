@@ -12,7 +12,7 @@ A solução foi desenhada para operar na região **us-east-1**, distribuindo rec
 
 ## GaphWiz
 
-![Diagrama da arquitetura AWS](grpahwiz.png)
+![Graphwiz](https://github.com/wagnerbianchijr/desf5/blob/main/graphwiz.png)
 
 ## Descrição funcional da arquitetura
 
