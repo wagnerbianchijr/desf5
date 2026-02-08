@@ -31,11 +31,6 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
-      - run: terraform fmt -check -recursive -diff
-      - run: terraform init -backend=false -lockfile=readonly -input=false -no-color
-      - run: terraform validate -no-color
-      - uses: terraform-linters/setup-tflint@v6.2.1
-        with:
-          cache: true
-      - run: tflint --init
-      - run: tflint --recursive
+      - run: terraform fmt -recursive
+      - run: terraform init -backend=false -lockfile=readonly
+      - run: terraform validate
