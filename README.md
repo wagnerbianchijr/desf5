@@ -107,6 +107,17 @@ Este projeto foi analisado com Infracost, uma ferramenta que estima os custos da
 
 Os recursos criados neste projeto podem gerar custos mesmo em estado "idle". Ideal para ambientes de teste, laboratório e aprendizado, mas sempre destrua quando terminar
 
+## Extensions
+
+As seguintes extensões foram utilizadas integradas ao VS Code:
+
+- tflint
+- infracost
+- tfsec
+- GitHub
+- GitGraph
+- GitLens
+
 ## Conclusão
 
 A arquitetura do desafio DESF5 foi estruturada para equilibrar desempenho, escalabilidade, segurança e resiliência, separando claramente camadas de acesso, aplicação e dados.

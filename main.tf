@@ -1,3 +1,29 @@
+/*
+  =============================================================================
+  Root Module (Composition Layer): main.tf
+  Owner:         Wagner “Bianchi” Bianchi
+  Role:          Database & Cloud Infrastructure
+  Repository:    https://github.com/wagnerbianchijr/desf5
+  Environment:   <dev|staging|prod> | Workspace: ${terraform.workspace}
+
+  What this file is:
+    This is the orchestration entrypoint that wires modules together and defines
+    how the stack composes as a whole (not where deep resource logic lives).
+
+  Design rules:
+    Keep resource-heavy logic inside modules.
+    Keep providers, backend/remote-state, and cross-module wiring here.
+    Pass only what’s needed: prefer explicit variables/outputs over ad-hoc refs.
+
+  Execution:
+    terraform init
+    terraform plan  -var-file=<env>.tfvars
+    terraform apply -var-file=<env>.tfvars
+  =============================================================================
+*/
+
+
+
 #:--------------------------------------------------------------
 #: KMS Key for encrypting resources in the primary VPC
 #:--------------------------------------------------------------
@@ -21,7 +47,7 @@ module "kms_primary" {
 #:--------------------------------------------------------------------------------
 module "vpc_primary" {
   source                      = "./modules/vpc"
-  vpc_name                    = "vpc-primary"
+  vpc_name                    = "xpe-vpc-primary"
   igw_name                    = "igw-primary"
   rt_name                     = "rt-primary"
   vpc_cidr_block              = "10.10.0.0/16"
@@ -176,9 +202,9 @@ module "sg_jumpbox" {
 module "asg_primary" {
   source = "./modules/asg"
 
-  asg_project_name  = "asg-primary"
-  asg_prefix        = "asg-primary"
-  asg_ami           = "ami-0445fdc83749c553e"
+  asg_project_name  = "xpe-asg-primary"
+  asg_prefix        = "xpe-asg-primary"
+  asg_ami           = "ami-0445fdc83749c553e" #: custom AMI (Apache + PHP) created for this project
   asg_instance_type = "t3.micro"
   #server_port       = 80
 
@@ -250,6 +276,9 @@ module "alb_primary" {
   }
 }
 
+#:--------------------------------------------------------------------------------
+#: RDS Instances Parameter Groups
+#:--------------------------------------------------------------------------------
 module "parameter_group_primary_db" {
   source = "./modules/pgr"
 
@@ -311,6 +340,9 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
+#:--------------------------------------------------------------------------------
+#: RDS Instances
+#:--------------------------------------------------------------------------------
 resource "aws_db_instance" "primary_db" {
   region               = "us-east-1"
   identifier           = "primary-db"
@@ -392,7 +424,7 @@ resource "aws_nat_gateway" "nat_gw" {
   subnet_id     = module.vpc_primary.public_subnets_ids[0]
 
   tags = {
-    Name = "xpe-nat-gw"
+    Name            = "xpe-nat-gw"
     ProjectOwnerTag = "Terraform Team"
     EnvironmentTag  = "secondary"
     CostCenterTag   = "CC1001"
@@ -412,9 +444,9 @@ resource "aws_route" "private_default_via_nat_single" {
   depends_on = [aws_nat_gateway.nat_gw]
 }
 
-#:--------------------------------------------------------------------------------
-#: Jump Box
-#:--------------------------------------------------------------------------------
+#:-------------------------------------------------------------------------------------------------
+#: Jump Box - it is just SSH Key based access, needs Hashicorp Vault or similar for production use
+#:-------------------------------------------------------------------------------------------------
 resource "aws_instance" "jumpbox" {
   provider                    = aws.aws_primary
   ami                         = "ami-0445fdc83749c553e"
@@ -424,7 +456,7 @@ resource "aws_instance" "jumpbox" {
   vpc_security_group_ids      = [module.sg_jumpbox.security_group_id]
 
   tags = {
-    Name = "xpe-jumpbox"
+    Name            = "xpe-jumpbox"
     ProjectOwnerTag = "Terraform Team"
     EnvironmentTag  = "secondary"
     CostCenterTag   = "CC1001"

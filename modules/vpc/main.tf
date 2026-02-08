@@ -1,6 +1,39 @@
-# -----------------------------------------------------------
-#: VPC creation
-# -----------------------------------------------------------
+/*
+  =============================================================================
+  Module:        vpc
+  File:          main.tf
+  Owner:         Wagner “Bianchi” Bianchi
+  Role:          Database & Cloud Infrastructure
+  Repository:    https://github.com/wagnerbianchijr/desf5
+  Documentation: https://github.com/wagnerbianchijr/desf5
+  License:       GPL-3.0 license
+
+  Purpose:
+    This module provisions a Virtual Private Cloud (VPC) in AWS, along with 
+    associated resources such as subnets, route tables, and an internet gateway. 
+    It also sets up VPC Flow Logs to monitor network traffic within the VPC.
+
+  Usage Notes:
+    - Ensure that the CIDR blocks for the VPC and subnets do not overlap with 
+      existing networks in your AWS account.
+    - The module creates both public and private subnets; configure your resources 
+      accordingly to use the appropriate subnets based on their access requirements.
+    - VPC Flow Logs are configured to send logs to CloudWatch Logs; ensure that 
+      you have the necessary permissions and log retention policies in place.
+    - This module does not include resources such as EC2 instances or RDS databases; 
+      it should be used in conjunction with modules that provision those resources.
+
+  Compatibility:
+    Terraform:    >= 1.14.2
+    Providers:    AWS
+    Tested On:    1.14.2
+
+  Contact:
+    For questions or issues, please open an issue in the GitHub repository or 
+    contact the owner directly.
+  =============================================================================
+*/
+
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true

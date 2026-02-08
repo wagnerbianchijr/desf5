@@ -1,3 +1,39 @@
+/*
+  =============================================================================
+  Module:        alb
+  File:          main.tf
+  Owner:         Wagner “Bianchi” Bianchi
+  Role:          Database & Cloud Infrastructure
+  Repository:    https://github.com/wagnerbianchijr/desf5
+  Documentation: https://github.com/wagnerbianchijr/desf5
+  License:       GPL-3.0 license
+
+  Purpose:
+    This module provisions an Application Load Balancer (ALB) in AWS, along 
+    with a target group and listener. It is used to distribute traffic across 
+    instances in an Auto Scaling Group.
+
+  Usage Notes:
+    - Ensure that the VPC and subnets specified in the variables exist before 
+    applying this module.
+    - The security groups attached to the ALB should allow inbound traffic on 
+    the listener port and outbound traffic to the target group instances.
+    - The target group should be configured with appropriate health check 
+    settings to ensure proper monitoring of instance health.
+    - This module does not include the Auto Scaling Group or EC2 instances; it 
+    should be used in conjunction with a module that provisions those resources.
+
+  Compatibility:
+    Terraform:    >= 1.14.2
+    Providers:    AWS
+    Tested On:    1.14.2
+
+  Contact:
+    For questions or issues, please open an issue in the GitHub repository or 
+    contact the owner directly.
+  =============================================================================
+*/
+
 resource "aws_lb" "this" {
   name               = var.load_balancer_name
   internal           = var.load_balancer_internal

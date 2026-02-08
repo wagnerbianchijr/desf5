@@ -1,6 +1,39 @@
-#:-----------------------------------------------------------------------------
-#: Terraform module for Auto Scaling Group (ASG) configuration
-#:-----------------------------------------------------------------------------
+/*
+  =============================================================================
+  Module:        asg
+  File:          main.tf
+  Owner:         Wagner “Bianchi” Bianchi
+  Role:          Database & Cloud Infrastructure
+  Repository:    https://github.com/wagnerbianchijr/desf5
+  Documentation: https://github.com/wagnerbianchijr/desf5
+  License:       GPL-3.0 license
+
+  Purpose:
+    This module provisions an Auto Scaling Group (ASG) in AWS, along with a 
+    launch template and a scaling policy. The ASG is used to automatically 
+    manage the number of EC2 instances based on demand, ensuring high 
+    availability and scalability for applications.
+
+  Usage Notes:
+    - Ensure that the target group ARNs and security group IDs specified in the 
+      variables exist before applying this module.
+    - The ASG will be associated with the specified target groups, so ensure 
+      that the health checks are properly configured for those target groups.
+    - The scaling policy is set to scale up based on CPU utilization; adjust 
+      the target value as needed for your application.
+    - This module does not include the ALB or EC2 instances; it should be used 
+      in conjunction with modules that provision those resources.
+
+  Compatibility:
+    Terraform:    >= 1.14.2
+    Providers:    AWS
+    Tested On:    1.14.2
+
+  Contact:
+    For questions or issues, please open an issue in the GitHub repository or 
+    contact the owner directly.
+  =============================================================================
+*/
 
 resource "aws_launch_template" "this" {
   name_prefix            = var.asg_prefix
