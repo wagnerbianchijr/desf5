@@ -53,20 +53,20 @@ variable "security_group_id" {
   description = "Security Group ID to be attached to the ASG instances"
 }
 
-variable "public_subnets_cidr_blocks" {
-  type        = list(string)
-  description = "Mapa de CIDR blocks para subnets publicas"
-}
+#variable "public_subnets_cidr_blocks" {
+#  type        = list(string)
+#  description = "Mapa de CIDR blocks para subnets publicas"
+#}
 
 variable "private_subnets_cidr_blocks" {
   type        = list(string)
   description = "Mapa de CIDR blocks para subnets privadas"
 }
 
-variable "availability_zones" {
-  type        = list(string)
-  description = "Lista de zonas de disponibilidade"
-}
+#variable "availability_zones" {
+#  type        = list(string)
+#  description = "Lista de zonas de disponibilidade"
+#}
 
 # -----------------------------------------------------------------
 #: tags variables
