@@ -8,11 +8,11 @@ A solução foi desenhada para operar na região **us-east-1**, distribuindo rec
 
 ## Diagrama da arquitetura
 
-![Diagrama da arquitetura AWS](./imgs/desafio_arquitecture.png)
+![Diagrama da arquitetura AWS](desafio_arquitecture.png)
 
 ## GaphWiz
 
-![Diagrama da arquitetura AWS](./imgs/grpahwiz.png)
+![Diagrama da arquitetura AWS](grpahwiz.png)
 
 ## Descrição funcional da arquitetura
 
