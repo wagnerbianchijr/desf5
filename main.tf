@@ -1,7 +1,6 @@
 #:--------------------------------------------------------------
-#: Main Terraform configuration file
+#: KMS Key for encrypting resources in the primary VPC
 #:--------------------------------------------------------------
-
 module "kms_primary" {
   source = "./modules/kms"
   region = "us-east-1"
@@ -17,7 +16,9 @@ module "kms_primary" {
   }
 }
 
-#: calling the VPC module for creating a VPC the primary VPC
+#:--------------------------------------------------------------------------------
+#: Primary VPC
+#:--------------------------------------------------------------------------------
 module "vpc_primary" {
   source                      = "./modules/vpc"
   vpc_name                    = "vpc-primary"
@@ -169,7 +170,9 @@ module "sg_jumpbox" {
   }
 }
 
-#: ASG primary in the primary VPC
+#:--------------------------------------------------------------------------------
+#: Auto Scaling Group
+#:--------------------------------------------------------------------------------
 module "asg_primary" {
   source = "./modules/asg"
 
@@ -206,7 +209,9 @@ module "asg_primary" {
   }
 }
 
-#: creating the ALB in the primary VPC
+#:--------------------------------------------------------------------------------
+#: Application Load Balancer
+#:--------------------------------------------------------------------------------
 module "alb_primary" {
   source = "./modules/alb"
 
@@ -285,7 +290,9 @@ module "parameter_group_secondary_db" {
   }
 }
 
-#: db subnet group in the primary VPC
+#:--------------------------------------------------------------------------------
+#: RDS Subnet Group
+#:--------------------------------------------------------------------------------
 resource "aws_db_subnet_group" "db_subnet_group" {
   region      = "us-east-1"
   name        = "rds-subnet-group"
@@ -362,14 +369,20 @@ resource "aws_db_instance" "secondary_db" {
   }
 }
 
-#: Nat Gateway so we can connect to ASG instances
-#: running on private subnets
+#:--------------------------------------------------------------------------------
+#: NAT Gateway and Route for Private Subnets
+#:--------------------------------------------------------------------------------
 resource "aws_eip" "nat_eip" {
   provider = aws.aws_primary
   domain   = "vpc"
 
   tags = {
-    Name = "desf5-nat-eip"
+    Name            = "xpe-nat-eip"
+    ProjectOwnerTag = "Terraform Team"
+    EnvironmentTag  = "secondary"
+    CostCenterTag   = "CC1001"
+    CreatedByTag    = "Bianchi"
+    TerraformedTag  = true
   }
 }
 
@@ -379,7 +392,12 @@ resource "aws_nat_gateway" "nat_gw" {
   subnet_id     = module.vpc_primary.public_subnets_ids[0]
 
   tags = {
-    Name = "desf5-nat-gw"
+    Name = "xpe-nat-gw"
+    ProjectOwnerTag = "Terraform Team"
+    EnvironmentTag  = "secondary"
+    CostCenterTag   = "CC1001"
+    CreatedByTag    = "Bianchi"
+    TerraformedTag  = true
   }
 
   depends_on = [module.vpc_primary]
@@ -394,7 +412,9 @@ resource "aws_route" "private_default_via_nat_single" {
   depends_on = [aws_nat_gateway.nat_gw]
 }
 
-#: criando um jump box para acessar as instâncias do ASG
+#:--------------------------------------------------------------------------------
+#: Jump Box
+#:--------------------------------------------------------------------------------
 resource "aws_instance" "jumpbox" {
   provider                    = aws.aws_primary
   ami                         = "ami-0445fdc83749c553e"
@@ -404,6 +424,11 @@ resource "aws_instance" "jumpbox" {
   vpc_security_group_ids      = [module.sg_jumpbox.security_group_id]
 
   tags = {
-    Name = "desf5-jumpbox"
+    Name = "xpe-jumpbox"
+    ProjectOwnerTag = "Terraform Team"
+    EnvironmentTag  = "secondary"
+    CostCenterTag   = "CC1001"
+    CreatedByTag    = "Bianchi"
+    TerraformedTag  = true
   }
 }

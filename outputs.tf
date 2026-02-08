@@ -23,6 +23,6 @@ output "private_subnets_ids" {
 }
 
 output "jumphost_ip" {
-  value       = "ssh -A ubuntu@${aws_instance.jumphost.public_ip}"
+  value       = "ssh -A ubuntu@${aws_instance.jumpbox.public_ip}"
   description = "IP público do jumphost para acesso via SSH"
 }
