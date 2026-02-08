@@ -42,11 +42,13 @@ module "vpc_primary" {
   }
 }
 
-#: creating a security group in the primary VPC
-module "sg_primary" {
+#:--------------------------------------------------------------------------------
+#: Security Group: Instances do ASG
+#:--------------------------------------------------------------------------------
+module "sg_primary_asg" {
   source  = "./modules/sg"
   vpc_id  = module.vpc_primary.vpc_id
-  sg_name = "xpe-sg-primary"
+  sg_name = "xpe-sg-primary-asg"
 
   #: resource tags
   project_owner_tag = "Terraform Team"
@@ -67,6 +69,86 @@ module "sg_primary" {
       description = "Allow HTTP"
       from_port   = 80
       to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+  ]
+
+  egress_rules = [
+    {
+      description = "Allow all outbound traffic"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  providers = {
+    aws = aws.aws_primary
+  }
+}
+
+#:--------------------------------------------------------------------------------
+#: Security Group: Postgres Database
+#:--------------------------------------------------------------------------------
+module "sg_primary_db" {
+  source  = "./modules/sg"
+  vpc_id  = module.vpc_primary.vpc_id
+  sg_name = "xpe-sg-primary-db"
+
+  #: resource tags
+  project_owner_tag = "Terraform Team"
+  environment_tag   = "primary"
+  cost_center_tag   = "CC1001"
+  created_by_tag    = "Bianchi"
+  terraformed_tag   = true
+
+  ingress_rules = [
+    {
+      description = "Allow Postgres only from app/public subnets"
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  egress_rules = [
+    {
+      description = "Allow all outbound traffic"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  providers = {
+    aws = aws.aws_primary
+  }
+}
+
+#:--------------------------------------------------------------------------------
+#: Security Group: Jump Box
+#:--------------------------------------------------------------------------------
+module "sg_jumpbox" {
+  source  = "./modules/sg"
+  vpc_id  = module.vpc_primary.vpc_id
+  sg_name = "xpe-sg-jumpbox"
+
+  #: resource tags
+  project_owner_tag = "Terraform Team"
+  environment_tag   = "primary"
+  cost_center_tag   = "CC1001"
+  created_by_tag    = "Bianchi"
+  terraformed_tag   = true
+
+  ingress_rules = [
+    {
+      description = "Allow SSH from anywhere"
+      from_port   = 22
+      to_port     = 22
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
     }
@@ -93,7 +175,7 @@ module "asg_primary" {
 
   asg_project_name  = "asg-primary"
   asg_prefix        = "asg-primary"
-  asg_ami           = "ami-02f8dc66e304ef92d"
+  asg_ami           = "ami-0445fdc83749c553e"
   asg_instance_type = "t3.micro"
   #server_port       = 80
 
@@ -101,13 +183,13 @@ module "asg_primary" {
   #: if you try to run only this module, it will not work as expected as you need to inform the
   #: security group id created in the VPC module manually
   #security_group_id = ""
-  security_group_id = module.sg_primary.security_group_id #: output from sg module
+  security_group_id = module.sg_primary_asg.security_group_id #: output from sg module
 
   asg_desired_capacity = 3
   asg_max_size         = 10
   asg_min_size         = 3
 
-  availability_zones          = ["us-east-1a", "us-east-1b", "us-east-1c"] /* unused */
+  availability_zones          = ["us-east-1a", "us-east-1b", "us-east-1c"]
   target_group_arns           = module.alb_primary.target_group_arns   #: output from alb module
   public_subnets_cidr_blocks  = module.vpc_primary.public_subnets_ids  #: output from vpc module
   private_subnets_cidr_blocks = module.vpc_primary.private_subnets_ids #: output from vpc module
@@ -131,7 +213,7 @@ module "alb_primary" {
   load_balancer_name            = "alb-primary"
   load_balancer_internal        = false
   load_balancer_type            = "application"
-  load_balancer_security_groups = [module.sg_primary.security_group_id]
+  load_balancer_security_groups = [module.sg_primary_asg.security_group_id]
   load_balancer_subnets         = module.vpc_primary.public_subnets_ids
   target_group_name             = "tg-primary"
   target_group_port             = 80
@@ -150,6 +232,46 @@ module "alb_primary" {
   listener_port     = 80
   listener_name     = "listener-primary"
   listener_protocol = "HTTP"
+
+  #: resource tags
+  project_owner_tag = "Terraform Team"
+  environment_tag   = "primary"
+  cost_center_tag   = "CC1001"
+  created_by_tag    = "Bianchi"
+  terraformed_tag   = true
+
+  providers = {
+    aws = aws.aws_primary
+  }
+}
+
+module "parameter_group_primary_db" {
+  source = "./modules/pgr"
+
+  parameter_group_name        = "xpe-pg17-logical-primary"
+  parameter_group_family      = "postgres17"
+  parameter_group_region      = "us-east-1"
+  parameter_group_description = "RDS PG17 logical replication"
+
+  #: resource tags
+  project_owner_tag = "Terraform Team"
+  environment_tag   = "primary"
+  cost_center_tag   = "CC1001"
+  created_by_tag    = "Bianchi"
+  terraformed_tag   = true
+
+  providers = {
+    aws = aws.aws_primary
+  }
+}
+
+module "parameter_group_secondary_db" {
+  source = "./modules/pgr"
+
+  parameter_group_name        = "xpe-pg17-logical-secondary"
+  parameter_group_family      = "postgres17"
+  parameter_group_region      = "us-east-1"
+  parameter_group_description = "RDS PG17 logical replication"
 
   #: resource tags
   project_owner_tag = "Terraform Team"
@@ -182,8 +304,6 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-
-#: creating the databases in the primary VPC
 resource "aws_db_instance" "primary_db" {
   region               = "us-east-1"
   identifier           = "primary-db"
@@ -196,13 +316,18 @@ resource "aws_db_instance" "primary_db" {
   skip_final_snapshot  = true
   multi_az             = true
   publicly_accessible  = false
+  storage_encrypted    = true
+  kms_key_id           = module.kms_primary.kms_key_id
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  parameter_group_name = module.parameter_group_primary_db.parameter_group_name
 
-  vpc_security_group_ids = [module.sg_primary.security_group_id]
+  vpc_security_group_ids = [module.sg_primary_db.security_group_id]
 
-  backup_retention_period = 7
+  backup_retention_period = 14
   backup_window           = "01:00-03:00"
   maintenance_window      = "mon:03:00-mon:06:00"
+
+  depends_on = [module.parameter_group_primary_db.parameter_group_name]
 
   tags = {
     ProjectOwnerTag = "Terraform Team"
@@ -220,9 +345,13 @@ resource "aws_db_instance" "secondary_db" {
   replicate_source_db  = aws_db_instance.primary_db.arn
   skip_final_snapshot  = true
   publicly_accessible  = false
+  storage_encrypted    = true
+  kms_key_id           = module.kms_primary.kms_key_id
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  parameter_group_name = module.parameter_group_secondary_db.parameter_group_name
 
-  vpc_security_group_ids = [module.sg_primary.security_group_id]
+  vpc_security_group_ids = [module.sg_primary_db.security_group_id]
+  depends_on             = [module.parameter_group_secondary_db.parameter_group_name]
 
   tags = {
     ProjectOwnerTag = "Terraform Team"
@@ -230,5 +359,51 @@ resource "aws_db_instance" "secondary_db" {
     CostCenterTag   = "CC1001"
     CreatedByTag    = "Bianchi"
     TerraformedTag  = true
+  }
+}
+
+#: Nat Gateway so we can connect to ASG instances
+#: running on private subnets
+resource "aws_eip" "nat_eip" {
+  provider = aws.aws_primary
+  domain   = "vpc"
+
+  tags = {
+    Name = "desf5-nat-eip"
+  }
+}
+
+resource "aws_nat_gateway" "nat_gw" {
+  provider      = aws.aws_primary
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = module.vpc_primary.public_subnets_ids[0]
+
+  tags = {
+    Name = "desf5-nat-gw"
+  }
+
+  depends_on = [module.vpc_primary]
+}
+
+resource "aws_route" "private_default_via_nat_single" {
+  provider               = aws.aws_primary
+  route_table_id         = module.vpc_primary.private_route_table_ids[0]
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat_gw.id
+
+  depends_on = [aws_nat_gateway.nat_gw]
+}
+
+#: criando um jump box para acessar as instâncias do ASG
+resource "aws_instance" "jumpbox" {
+  provider                    = aws.aws_primary
+  ami                         = "ami-0445fdc83749c553e"
+  instance_type               = "t3.micro"
+  associate_public_ip_address = true
+  subnet_id                   = module.vpc_primary.public_subnets_ids[0]
+  vpc_security_group_ids      = [module.sg_jumpbox.security_group_id]
+
+  tags = {
+    Name = "desf5-jumpbox"
   }
 }

@@ -1,0 +1,47 @@
+name: Terraform Lint and Security
+
+on:
+  pull_request:
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - '.terraform.lock.hcl'
+      - '.tflint.hcl'
+      - '.github/workflows/terraform-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.tf'
+      - '**/*.tfvars'
+      - '.terraform.lock.hcl'
+      - '.tflint.hcl'
+      - '.github/workflows/terraform-ci.yml'
+
+env:
+  TF_ROOT: .
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.TF_ROOT }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive -diff
+      - run: terraform init -backend=false -lockfile=readonly -input=false -no-color
+      - run: terraform validate -no-color
+      - uses: terraform-linters/setup-tflint@v6.2.1
+        with:
+          cache: true
+      - run: tflint --init
+      - run: tflint --recursive
+      - uses: aquasecurity/trivy-action@v0.0.3
+        with:
+          scan-type: 'terraform'
+          format: 'table'
+          severity-threshold: 'HIGH'
+          exit-code: '1'
